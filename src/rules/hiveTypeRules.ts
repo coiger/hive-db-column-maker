@@ -133,3 +133,103 @@ export const checkValidDataType = (rawType: string): boolean => {
     checkValidUnionType(type)
   );
 };
+
+/**
+ * 백틱 내의 문자는 그대로 두고, 나머지는 공백 제거 및 대문자화를 수행합니다.
+ */
+export const makeCompact = (text: string) => {
+  const tokens = text.split('`');
+  return tokens.map((token, index) => (index % 2 ? `\`${token}\`` : token.replace(/\s/g, '').toUpperCase())).join('');
+};
+
+/**
+ * Hive 타입 형식을 적절히 포맷팅 합니다.
+ * @description 필수적이지는 않으나, makeCompact 함수를 거쳐 단순화된 형태가 선호됩니다.
+ * @returns 커서 위치를 나타내는 ‸가 있을 경우, 해당 위치도 반환합니다.
+ */
+export const makePretty = (text: string): [string, null | number] => {
+  const INDENT = '  ';
+  let indentLevel = 0;
+  let isInBacktick = false;
+  let isInCurvedParen = false;
+  let cursorPos = null;
+
+  let formattedText = '';
+  for (let i = 0; i < text.length; i += 1) {
+    const c = text[i];
+    if (c === '‸') {
+      cursorPos = formattedText.length;
+      // eslint-disable-next-line no-continue
+      continue;
+    }
+
+    if (isInBacktick) {
+      if (c === '`') isInBacktick = !isInBacktick;
+      formattedText += c;
+    } else if (isInCurvedParen) {
+      if (c === ')') isInCurvedParen = !isInCurvedParen;
+      formattedText += c;
+      if (c === ',') formattedText += ' ';
+    } else if (c === '<') {
+      // short type(text) lookahead
+      let nestedStr = '';
+      let openParenCnt = 1;
+      let j = i + 1;
+      while (openParenCnt && j - i <= 16) {
+        const nestedChar = text[j];
+        if (nestedChar === '<') openParenCnt += 1;
+        else if (nestedChar === '>') openParenCnt -= 1;
+        j += 1;
+        nestedStr += nestedChar;
+      }
+
+      if (openParenCnt) {
+        indentLevel += 1;
+        // cursor lookahead before newline
+        if (text[i + 1] === '‸') {
+          cursorPos = formattedText.length + 1;
+          i += 1;
+        }
+        formattedText = `${formattedText}<\n${INDENT.repeat(indentLevel)}`;
+      } else {
+        if (nestedStr.includes('‸')) {
+          const caretIdx = nestedStr.indexOf('‸');
+          cursorPos = formattedText.length + caretIdx + 1;
+          nestedStr = nestedStr.slice(0, caretIdx) + nestedStr.slice(caretIdx + 1);
+        }
+        formattedText += `<${nestedStr}`;
+        i = j - 1;
+      }
+    } else {
+      switch (c) {
+        case ':':
+          formattedText += ': ';
+          break;
+        case ',':
+          // cursor lookahead before newline
+          if (text[i + 1] === '‸') {
+            cursorPos = formattedText.length + 1;
+            i += 1;
+          }
+          formattedText = `${formattedText},\n${INDENT.repeat(indentLevel)}`;
+          break;
+        case '>':
+          indentLevel -= 1;
+          formattedText = `${formattedText}\n${INDENT.repeat(indentLevel)}>`;
+          break;
+        case '`':
+          isInBacktick = !isInBacktick;
+          formattedText += '`';
+          break;
+        case '(':
+          isInCurvedParen = !isInCurvedParen;
+          formattedText += '(';
+          break;
+        default:
+          formattedText += c;
+      }
+    }
+  }
+
+  return [formattedText, cursorPos];
+};

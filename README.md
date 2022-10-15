@@ -50,7 +50,7 @@ Hive 규칙에 따른 database column 이름/타입 검증 및 포맷팅 에디�
 - 타입 규칙을 지킨 입력의 경우 보기 좋은 형식으로 포맷팅
 - 타입 규칙을 어긴 입력의 경우 입력창 테두리가 붉어짐
 
-## 개발 스택
+## 개발 스택 (only front-end)
 - This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 - 언어 : TypeScript
 - 스타일링 : CSS Module, Ant Design

@@ -1,0 +1,18 @@
+.db-column-insert {
+  margin-bottom: 24px;
+}
+
+.textarea {
+  margin-top: 5px;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+}
+
+.hint {
+  color: gray;
+  padding: 5px 10px 0;
+  margin-bottom: 0;
+}
+
+.select-type {
+  width: 100%;
+}

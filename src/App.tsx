@@ -69,25 +69,27 @@ function App() {
 
   return (
     <div className='App'>
-      <Title level={3}>Hive Database Columns Definition</Title>
-      <DBColumnInsert onInsert={onInsert} />
-      <Divider />
-      <Title level={4}>Column List</Title>
-      <Table
-        dataSource={dbColumns}
-        columns={columns}
-        size='small'
-        pagination={{ pageSize: 5 }}
-        expandable={{
-          expandedRowRender,
-          rowExpandable: record => !primitiveTypes.includes(record.type) && record.type.length > 20,
-        }}
-      />
-      <Divider />
-      <Title level={4}>Compressed String</Title>
-      <Text className='compressed-str' code copyable>
-        {compressedTypes || 'empty'}
-      </Text>
+      <div className='Hive'>
+        <Title level={3}>Hive Database Columns Definition</Title>
+        <DBColumnInsert onInsert={onInsert} />
+        <Divider />
+        <Title level={4}>Column List</Title>
+        <Table
+          dataSource={dbColumns}
+          columns={columns}
+          size='small'
+          pagination={{ pageSize: 5 }}
+          expandable={{
+            expandedRowRender,
+            rowExpandable: record => !primitiveTypes.includes(record.type) && record.type.length > 20,
+          }}
+        />
+        <Divider />
+        <Title level={4}>Compressed String</Title>
+        <Text className='compressed-str' code copyable>
+          {compressedTypes || 'empty'}
+        </Text>
+      </div>
     </div>
   );
 }

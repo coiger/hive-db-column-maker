@@ -1,11 +1,15 @@
 @import '~antd/dist/antd.css';
 
 .App {
-  margin: 20px auto;
+  display: flex;
+  justify-content: center;
+}
+
+.Hive {
+  margin: 24px 0;
   max-width: 1000px;
   width: 80%;
 }
-
 .code {
   font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
 }

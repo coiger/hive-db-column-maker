@@ -1,8 +1,4 @@
-.db-column-insert {
-  margin-bottom: 24px;
-}
-
-.textarea {
+#textarea {
   margin-top: 5px;
   font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
 }
@@ -15,4 +11,5 @@
 
 .select-type {
   width: 100%;
+  margin-bottom: 4px;
 }

@@ -1,1 +1,15 @@
 @import '~antd/dist/antd.css';
+
+.App {
+  margin: 20px auto;
+  max-width: 1000px;
+  width: 80%;
+}
+
+.code {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+}
+
+.compressed-str {
+  word-break: break-all;
+}

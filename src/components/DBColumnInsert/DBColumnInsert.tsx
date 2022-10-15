@@ -4,7 +4,6 @@ import { Button, Card, Col, Form, Row, Select, notification } from 'antd';
 import TextArea, { TextAreaRef } from 'antd/lib/input/TextArea';
 import { PlusCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import { BaseSelectRef } from 'rc-select';
-import styles from './DBColumnInsert.module.css';
 import {
   checkValidDataType,
   DIRECT_INPUT,
@@ -13,6 +12,7 @@ import {
   makePretty,
   primitiveTypes,
 } from 'rules/hiveTypeRules';
+import styles from './DBColumnInsert.module.css';
 
 const { Option } = Select;
 
@@ -92,7 +92,7 @@ function DBColumnInsert({ onInsert }: PropTypes) {
   };
 
   return (
-    <Card className={styles['db-column-insert']}>
+    <Card>
       <Form>
         <Form.Item
           required
@@ -167,7 +167,7 @@ function DBColumnInsert({ onInsert }: PropTypes) {
           </Select>
           {showTextArea && (
             <TextArea
-              className={styles.textarea}
+              id={styles.textarea}
               ref={textAreaRef}
               autoFocus
               status={(!submitWasTried && manualTypeInput === '') || isValidType ? undefined : 'error'}

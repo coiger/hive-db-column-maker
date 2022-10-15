@@ -1,4 +1,5 @@
 {
+  "homepage": "https://coiger.github.io/hive-db-column-maker",
   "name": "hive-db-column-maker",
   "version": "0.1.0",
   "private": true,

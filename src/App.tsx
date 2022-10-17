@@ -1,4 +1,4 @@
-import { MinusCircleOutlined } from '@ant-design/icons';
+import { GithubOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import { Button, Divider, Popconfirm, Table, Typography } from 'antd';
 import { memo, useState, useRef } from 'react';
 import DBColumnInsert from 'components/DBColumnInsert/DBColumnInsert';
@@ -69,6 +69,14 @@ function App() {
 
   return (
     <div className='App'>
+      <Button
+        className='social-icon'
+        href='https://github.com/coiger/hive-db-column-maker/'
+        target='_blank'
+        type='link'
+        size='large'
+        icon={<GithubOutlined />}
+      />
       <div className='Hive'>
         <Title level={3}>Hive Database Columns Definition</Title>
         <DBColumnInsert onInsert={onInsert} />

@@ -17,3 +17,10 @@
 .compressed-str {
   word-break: break-all;
 }
+
+.social-icon {
+  position: absolute;
+  top: 1em;
+  right: 1em;
+  color: black;
+}

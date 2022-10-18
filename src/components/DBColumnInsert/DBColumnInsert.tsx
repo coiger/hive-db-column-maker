@@ -25,6 +25,7 @@ function DBColumnInsert({ onInsert }: PropTypes) {
   const [type, setType] = useState('');
 
   const [submitWasTried, setSubmitWasTried] = useState(false);
+  const [isDupName, setIsDupName] = useState(false);
   const isEmptyName = submitWasTried && name === '';
   const isEmptyType = submitWasTried && type === '';
 
@@ -63,7 +64,17 @@ function DBColumnInsert({ onInsert }: PropTypes) {
       return;
     }
 
-    onInsert(`\`${name.replace(/`/g, '``')}\``, type);
+    if (!onInsert(`\`${name.replace(/`/g, '``')}\``, type)) {
+      setIsDupName(true);
+      notification.error({
+        message: 'Hive Column 입력 오류',
+        description: `\`${name}\`은(는) 이미 존재하는 이름입니다.`,
+        placement: 'bottomRight',
+      });
+      return;
+    }
+
+    /* Clean up */
     setName('');
     setType('');
     setSubmitWasTried(false);
@@ -105,7 +116,7 @@ function DBColumnInsert({ onInsert }: PropTypes) {
             className='db-column-name-input'
             ref={nameInputRef}
             value={name}
-            status={isEmptyName ? 'error' : ''}
+            status={isEmptyName || isDupName ? 'error' : ''}
             placeholder={isEmptyName ? '필수 입력입니다' : ''}
             addonBefore='`'
             addonAfter='`'
@@ -119,6 +130,7 @@ function DBColumnInsert({ onInsert }: PropTypes) {
                 return;
               }
               setName(e.target.value);
+              setIsDupName(false);
             }}
             onPressEnter={handleSubmit}
           />

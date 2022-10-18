@@ -18,7 +18,12 @@ function App() {
   const [dbColumns, setDBColumns] = useState<DBColumnType[]>([]);
   const nextKey = useRef(0);
 
+  /**
+   * dbColumns 배열에 새 원소 삽입
+   * @returns 삽입 성공 여부 (중복 이름 삽입 시 실패)
+   */
   const onInsert = (newName: string, newType: string): boolean => {
+    if (dbColumns.some(({ name }) => name === newName)) return false;
     setDBColumns(cur => {
       const nextState = [...cur, { key: nextKey.current, name: newName, type: newType }];
       setCompressedTypes(nextState.map(({ name, type }) => `('${name}', '${type}')`).join(', '));

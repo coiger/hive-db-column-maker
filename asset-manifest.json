@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/hive-db-column-maker/static/css/main.70f756cb.css",
-    "main.js": "/hive-db-column-maker/static/js/main.a6817dec.js",
+    "main.css": "/hive-db-column-maker/static/css/main.d9aaff43.css",
+    "main.js": "/hive-db-column-maker/static/js/main.9f68c84c.js",
     "static/js/787.00426c33.chunk.js": "/hive-db-column-maker/static/js/787.00426c33.chunk.js",
     "index.html": "/hive-db-column-maker/index.html",
-    "main.70f756cb.css.map": "/hive-db-column-maker/static/css/main.70f756cb.css.map",
-    "main.a6817dec.js.map": "/hive-db-column-maker/static/js/main.a6817dec.js.map",
+    "main.d9aaff43.css.map": "/hive-db-column-maker/static/css/main.d9aaff43.css.map",
+    "main.9f68c84c.js.map": "/hive-db-column-maker/static/js/main.9f68c84c.js.map",
     "787.00426c33.chunk.js.map": "/hive-db-column-maker/static/js/787.00426c33.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.70f756cb.css",
-    "static/js/main.a6817dec.js"
+    "static/css/main.d9aaff43.css",
+    "static/js/main.9f68c84c.js"
   ]
 }

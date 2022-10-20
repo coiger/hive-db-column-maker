@@ -128,10 +128,10 @@ function DBColumnInsert({ onInsert }: PropTypes) {
                 });
                 return;
               }
-              if (/[,|:|(|)|<|>]/.test(value)) {
+              if (/[,|:|(|)|<|>|\s]/.test(value)) {
                 notification.error({
                   message: 'Hive Column 입력 오류',
-                  description: `타입 구분 문자인 쉼표[,], 콜론[:], 괄호[(), <>]는 사용할 수 없습니다.`,
+                  description: `공백 및 타입 구분 문자(쉼표[,], 콜론[:], 괄호[(), <>])는 사용할 수 없습니다.`,
                   placement: 'bottomRight',
                 });
                 return;

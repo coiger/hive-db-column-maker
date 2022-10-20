@@ -5,9 +5,9 @@ import TextArea, { TextAreaRef } from 'antd/lib/input/TextArea';
 import { PlusCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import { BaseSelectRef } from 'rc-select';
 import {
-  checkValidDataType,
+  backtickedType,
   DIRECT_INPUT,
-  isCorrectParenthesis,
+  isValidHiveType,
   makeCompact,
   makePretty,
   primitiveTypes,
@@ -64,7 +64,7 @@ function DBColumnInsert({ onInsert }: PropTypes) {
       return;
     }
 
-    if (!onInsert(`\`${name.replace(/`/g, '``')}\``, type)) {
+    if (!onInsert(`\`${name.replace(/`/g, '``')}\``, backtickedType(type))) {
       setIsDupName(true);
       notification.error({
         message: 'Hive Column 입력 오류',
@@ -118,18 +118,33 @@ function DBColumnInsert({ onInsert }: PropTypes) {
             value={name}
             status={isEmptyName || isDupName ? 'error' : ''}
             placeholder={isEmptyName ? '필수 입력입니다' : ''}
-            addonBefore='`'
-            addonAfter='`'
             onChange={e => {
-              if (e.target.value.includes('‸')) {
+              let { value } = e.target;
+              if (value.includes('‸')) {
                 notification.warning({
-                  message: 'Hive Column 입력 경로',
+                  message: 'Hive Column 입력 경고',
                   description: `CARET(‸) 문자는 사용이 제한되어 있습니다.`,
                   placement: 'bottomRight',
                 });
                 return;
               }
-              setName(e.target.value);
+              if (/[,|:|(|)|<|>]/.test(value)) {
+                notification.error({
+                  message: 'Hive Column 입력 오류',
+                  description: `타입 구분 문자인 쉼표[,], 콜론[:], 괄호[(), <>]는 사용할 수 없습니다.`,
+                  placement: 'bottomRight',
+                });
+                return;
+              }
+              if (/^`.*`$/.test(value)) {
+                notification.info({
+                  message: 'Hive Column 이름 백틱 규칙',
+                  description: `컬럼 이름에 백틱은 자동으로 둘러집니다.`,
+                  placement: 'bottomRight',
+                });
+                value = value.slice(1, -1);
+              }
+              setName(value);
               setIsDupName(false);
             }}
             onPressEnter={handleSubmit}
@@ -138,7 +153,12 @@ function DBColumnInsert({ onInsert }: PropTypes) {
             <div className={styles.hint}>
               &#8251; 입력된 이름은 백틱(`)으로 감싸지게 됩니다.
               <ul>
-                <li>모든 유니코드 문자를 사용할 수 있습니다.</li>
+                <li>
+                  <b>공백 및 타입 구분 문자를 제외한</b> 모든 유니코드 문자를 사용할 수 있습니다.
+                </li>
+                <ul>
+                  <li>{`타입 구분 문자 : 쉼표[,], 콜론[:], 괄호[(), <>]`}</li>
+                </ul>
                 <li>이름 자체에 백틱을 사용할 수도 있으나, 이중-백틱(``)으로 변환됩니다.</li>
               </ul>
             </div>
@@ -195,13 +215,22 @@ function DBColumnInsert({ onInsert }: PropTypes) {
                 }
 
                 const text = e.target.value;
-                const isValid = isCorrectParenthesis(text) && checkValidDataType(text);
+                const isValid = isValidHiveType(text);
                 setIsValidType(isValid);
 
                 if (isValid) {
                   const compactText = makeCompact(text);
-                  if (text !== compactText && compactText === makeCompact(manualTypeInput)) {
-                    // if compact version isn't changed, do not formatting, just update state
+                  if (text.match(/`/g)?.length !== compactText.match(/`/g)?.length) {
+                    notification.info({
+                      message: 'Hive Column 이름 백틱 규칙',
+                      description: `컬럼 이름에 백틱은 자동으로 둘러집니다.`,
+                      placement: 'bottomRight',
+                    });
+                  } else if (
+                    // no backtick is removed, and
+                    isValidHiveType(manualTypeInput) && // if previous input was valid, and
+                    compactText === makeCompact(manualTypeInput) // if compact version of current input is same as compact previous input
+                  ) {
                     setManualTypeInput(text);
                     return;
                   }
@@ -250,11 +279,6 @@ function DBColumnInsert({ onInsert }: PropTypes) {
                 <li>{'ARRAY < data_type >'}</li>
                 <li>{'MAP < primitive_type, data_type >'}</li>
                 <li>{'STRUCT < col_name : data_type, ... >'}</li>
-                <ul>
-                  <li>
-                    <i>주의: 컬럼 이름(col_name)은 반드시 백틱(`)으로 둘러싸야 합니다.</i>
-                  </li>
-                </ul>
                 <li>{'UNIONTYPE < data_type, data_type, ... >'}</li>
               </ul>
             </div>

@@ -19,7 +19,7 @@ export const primitiveTypes = [
   'BINARY',
 ];
 
-export const isCorrectParenthesis = (type: string) => {
+const isCorrectParenthesis = (type: string) => {
   const openParen = [];
   let alreadyAllClosed = false;
 
@@ -41,37 +41,41 @@ export const isCorrectParenthesis = (type: string) => {
 };
 
 /**
+ * @param text 문자열 내에 '<'가 존재하고, 마지막 문자가 '>'인 문자열
+ * @returns '<'와 '>' 내의 문자열을 반환
+ */
+const getNested = (text: string) => text.slice(text.indexOf('<') + 1, -1);
+
+/**
+ * separator로 문자열을 토큰화합니다.
+ * @description 괄호 안의 separator는 무시합니다.
+ */
+const tokenize = (types: string, separator: string) => {
+  const ret: string[] = [];
+  let isInParenthesis = 0;
+  types.split(separator).forEach(type => {
+    const trimmedType = type.trim();
+    if (isInParenthesis === 0) {
+      ret[ret.length] = trimmedType;
+    } else {
+      ret[ret.length - 1] = ret[ret.length - 1] + separator + trimmedType;
+    }
+    isInParenthesis += type.match(/<|\(/g)?.length ?? 0;
+    isInParenthesis -= type.match(/>|\)/g)?.length ?? 0;
+  });
+  return ret;
+};
+
+/**
  * 타입이 Hive 형식에 맞는지 확인합니다.
  * @description 이 함수는 isCorrectParenthesis()가 true임을 가정합니다.
  */
-export const checkValidDataType = (rawType: string): boolean => {
+const checkValidDataType = (rawType: string): boolean => {
   const checkValidPrimitiveType = (type: string) =>
     primitiveTypes.includes(type.toUpperCase()) ||
     /^CHAR\s*\(\s*\d+\s*\)$/is.test(type) ||
     /^VARCHAR\s*\(\s*\d+\s*\)$/is.test(type) ||
     /^DECIMAL\s*\(\s*\d+\s*,\s*\d+\s*\)$/is.test(type);
-
-  const getNested = (type: string) => type.slice(type.indexOf('<') + 1, -1);
-
-  /**
-   * separator로 문자열을 토큰화합니다.
-   * @description 괄호 안의 separator는 무시합니다.
-   */
-  const tokenize = (types: string, separator: string) => {
-    const ret: string[] = [];
-    let isInParenthesis = 0;
-    types.split(separator).forEach(type => {
-      const trimmedType = type.trim();
-      if (isInParenthesis === 0) {
-        ret[ret.length] = trimmedType;
-      } else {
-        ret[ret.length - 1] = ret[ret.length - 1] + separator + trimmedType;
-      }
-      isInParenthesis += type.match(/<|\(/g)?.length ?? 0;
-      isInParenthesis -= type.match(/>|\)/g)?.length ?? 0;
-    });
-    return ret;
-  };
 
   /**
    * ARRAY < data_type > 형식에 맞는지 확인합니다.
@@ -97,7 +101,6 @@ export const checkValidDataType = (rawType: string): boolean => {
 
   /**
    * STRUCT < col_name : data_type, ... > 형식이 맞는지 확인합니다.
-   * @description 컬럼 이름(col_name)은 반드시 백틱(`)으로 둘러싸야 합니다.
    */
   const checkValidStructType = (type: string) => {
     if (!/^STRUCT\s*<.*>$/is.test(type)) return false;
@@ -107,7 +110,7 @@ export const checkValidDataType = (rawType: string): boolean => {
     const nameTypePairs = tokenize(nestedStr, ',').map(pair => tokenize(pair, ':').map(s => s.trim()));
     return (
       nameTypePairs.every(pair => pair.length === 2) &&
-      nameTypePairs.every(([colName, dataType]) => /^`.+`$/.test(colName) && checkValidDataType(dataType))
+      nameTypePairs.every(([colName, dataType]) => !/\s+/s.test(colName) && checkValidDataType(dataType))
     );
   };
 
@@ -134,23 +137,51 @@ export const checkValidDataType = (rawType: string): boolean => {
   );
 };
 
+export const isValidHiveType = (type: string) => isCorrectParenthesis(type) && checkValidDataType(type);
+
 /**
- * 백틱 내의 문자는 그대로 두고, 나머지는 공백 제거 및 대문자화를 수행합니다.
+ * 공백을 제거하고, STRUCT 타입의 컬럼 이름을 제외한 문자의 대문자화를 수행합니다.
+ * STRUCT 타입의 컬럼 이름에 백틱이 둘러져 있는 경우, 백틱을 제거해줍니다.
+ * @description checkValidDataType() 함수의 반환값이 true인 텍스트를 입력으로 가정합니다.
  */
 export const makeCompact = (text: string) => {
-  const tokens = text.split('`');
-  return tokens.map((token, index) => (index % 2 ? `\`${token}\`` : token.replace(/\s/g, '').toUpperCase())).join('');
+  /**
+   * @param noSpaceText 공백이 없는 텍스트
+   */
+  const helpMakeCompact = (noSpaceText: string): string => {
+    if (noSpaceText.at(-1) === '‸') return `${helpMakeCompact(noSpaceText.slice(0, -1))}‸`;
+
+    if (/^‸?S‸?T‸?R‸?U‸?C‸?T‸?<.*>$/i.test(noSpaceText)) {
+      const nameTypePairs = tokenize(getNested(noSpaceText), ',').map(pair => tokenize(pair, ':').map(s => s.trim()));
+      return `${noSpaceText.split('<', 1)[0]}<${nameTypePairs
+        .map(([colName, dataType]) => {
+          let unBacktickedColName = colName;
+          if (/^`.*`‸?$/.test(colName)) {
+            if (colName.at(-1) === '‸') unBacktickedColName = `${colName.slice(1, -2)}‸`;
+            else unBacktickedColName = colName.slice(1, -1);
+          }
+          return `${unBacktickedColName}:${helpMakeCompact(dataType)}`;
+        })
+        .join(',')}>`;
+    }
+
+    if (noSpaceText.includes('<'))
+      return `${noSpaceText.split('<', 1)[0].toUpperCase()}<${helpMakeCompact(getNested(noSpaceText))}>`;
+
+    return noSpaceText.toUpperCase(); // primitive types
+  };
+
+  return helpMakeCompact(text.replace(/\s/g, ''));
 };
 
 /**
  * Hive 타입 형식을 적절히 포맷팅 합니다.
- * @description 필수적이지는 않으나, makeCompact 함수를 거쳐 단순화된 형태가 선호됩니다.
+ * @description makeCompact 함수를 거친 문자열을 가정합니다.
  * @returns 커서 위치를 나타내는 ‸가 있을 경우, 해당 위치도 반환합니다.
  */
 export const makePretty = (text: string): [string, null | number] => {
   const INDENT = '  ';
   let indentLevel = 0;
-  let isInBacktick = false;
   let isInCurvedParen = false;
   let cursorPos = null;
 
@@ -163,10 +194,7 @@ export const makePretty = (text: string): [string, null | number] => {
       continue;
     }
 
-    if (isInBacktick) {
-      if (c === '`') isInBacktick = !isInBacktick;
-      formattedText += c;
-    } else if (isInCurvedParen) {
+    if (isInCurvedParen) {
       if (c === ')') isInCurvedParen = !isInCurvedParen;
       formattedText += c;
       if (c === ',') formattedText += ' ';
@@ -217,10 +245,6 @@ export const makePretty = (text: string): [string, null | number] => {
           indentLevel -= 1;
           formattedText = `${formattedText}\n${INDENT.repeat(indentLevel)}>`;
           break;
-        case '`':
-          isInBacktick = !isInBacktick;
-          formattedText += '`';
-          break;
         case '(':
           isInCurvedParen = !isInCurvedParen;
           formattedText += '(';
@@ -232,4 +256,21 @@ export const makePretty = (text: string): [string, null | number] => {
   }
 
   return [formattedText, cursorPos];
+};
+
+/**
+ * STRUCT 타입의 컬럼 이름을 백틱(`)으로 두르고, 백틱(`)이 있다면 더블-백틱(``)으로 변환합니다.
+ * @param type makeCompact를 거친 문자열
+ */
+export const backtickedType = (type: string): string => {
+  if (/^STRUCT<.*>$/i.test(type)) {
+    const nameTypePairs = tokenize(getNested(type), ',').map(pair => tokenize(pair, ':'));
+    return `STRUCT<${nameTypePairs
+      .map(([colName, dataType]) => `\`${colName.replace(/`/g, '``')}\`:${backtickedType(dataType)}`)
+      .join(',')}>`;
+  }
+
+  if (type.includes('<')) return `${type.split('<', 1)[0]}<${backtickedType(getNested(type))}>`;
+
+  return type; // primitive types
 };

@@ -3,19 +3,20 @@ Hive 규칙에 따른 database column 이름/타입 검증 및 포맷팅 에디�
 
 ## 이름 규칙
 - [기본 규칙](https://cwiki.apache.org/confluence/display/hive/languagemanual+ddl#LanguageManualDDL-RulesforColumnNames:~:text=result%20in%20error.-,Alter,-Column)에 기반
+- STRUCT 타입 내 컬럼 이름에도 동일한 규칙 적용
 
 ### Implemented Rule
 - 대소문자 비구문(case-insensitive)
 - 중복되는 이름 비허용
-- 공백을 포함한 모든 유니코드 문자 허용
+- 공백 및 타입 구분 문자를 제외한 모든 유니코드 문자 허용
+    - 타입 구분 문자 = 쉼표(,)와 콜론(:), 그리고 괄호('<', '>', '(', ')')
 - 입력한 내용을 백틱(`)으로 둘러 변환
 - 입력한 내용에 백틱이 있는 경우 이중-백틱(``)으로 변환
 
 ## 타입 규칙
 - [기본 규칙](https://cwiki.apache.org/confluence/display/hive/languagemanual+ddl#LanguageManualDDL-CreateTable)에 기반
 
-### Implemented Rule
-#### Supported Primitive Type
+### Supported Primitive Type
 - Numeric Types: INT, BIGINT, SMALLINT, TINYINT, DECIMAL, DECIMAL(precision, scale), FLOAT, DOUBLE
 - Date/Time Types: TIMESTAMP, DATE
 - Misc Types: BOOLEAN, BINARY
@@ -25,7 +26,7 @@ Hive 규칙에 따른 database column 이름/타입 검증 및 포맷팅 에디�
 - ARRAY < data_type >
 - MAP < primitive_type, data_type >
 - STRUCT < col_name : data_type, ... >
-  - 컬럼 이름(col_name)은 반드시 백틱(`)으로 둘러싸야함.
+    - col_name 규칙은 [이름 규칙](#이름-규칙)을 따름
 - UNIONTYPE < data_type, data_type, ... >
 
 ## 기능

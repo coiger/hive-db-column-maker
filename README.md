@@ -1,5 +1,6 @@
 # Hive Database Column Maker
-Hive 규칙에 따른 database column 이름/타입 검증 및 포맷팅 에디터
+Hive 규칙에 따른 database column 이름/타입 검증 및 포맷팅 에디터  
+- **DEMO**: https://coiger.github.io/hive-db-column-maker/
 
 ## 이름 규칙
 - [기본 규칙](https://cwiki.apache.org/confluence/display/hive/languagemanual+ddl#LanguageManualDDL-RulesforColumnNames:~:text=result%20in%20error.-,Alter,-Column)에 기반

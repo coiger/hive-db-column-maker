@@ -142,7 +142,45 @@ function DBColumnInsert({ onInsert }: PropTypes) {
       return;
     }
 
-    const text = e.target.value;
+    let text = e.target.value;
+    const currentCursorPos = e.target.selectionStart;
+
+    if (text.length === manualTypeInput.length + 1) {
+      /**
+       * 현재 커서 바로 전에 위치한 문자로, 사용자가 방금 막 입력한 문자
+       */
+      const charBeforeCursor = text[currentCursorPos - 1];
+      /**
+       * 현재 커서 바로 다음에 위치한 문자로, 사용자가 방금 막 입력한 문자 다음에 있는 문자
+       */
+      const charAfterCursor = text[currentCursorPos];
+      if (charAfterCursor === undefined || /[\s>)]/.test(charAfterCursor)) {
+        // 여는 괄호를 입력한 경우, 괄호 이후가 입력의 끝이나 공백, 또는 닫는 괄호이면 닫는 괄호를 자동으로 붙입니다.
+        const closeParen = { '<': '>', '(': ')' };
+        if (charBeforeCursor === '<' || charBeforeCursor === '(') {
+          text = `${text.slice(0, currentCursorPos)}${closeParen[charBeforeCursor]}${text.slice(currentCursorPos)}`;
+          setManualTypeInput(text);
+          setIsValidType(false);
+          setType('');
+          setTimeout(() => {
+            e.target.selectionStart = currentCursorPos;
+            e.target.selectionEnd = currentCursorPos;
+          }, 0);
+          return;
+        }
+      }
+      if (charAfterCursor === charBeforeCursor) {
+        // 다음 문자가 닫는 괄호인데 닫는 괄호를 입력한 경우 커서만 다음으로 옮겨줍니다.
+        if (charBeforeCursor === '>' || charBeforeCursor === ')') {
+          setTimeout(() => {
+            e.target.selectionStart = currentCursorPos;
+            e.target.selectionEnd = currentCursorPos;
+          }, 0);
+          return;
+        }
+      }
+    }
+
     const isValid = isValidHiveType(text);
     setIsValidType(isValid);
 
@@ -163,7 +201,6 @@ function DBColumnInsert({ onInsert }: PropTypes) {
         return;
       }
 
-      const currentCursorPos = e.target.selectionStart;
       const textWithCursor = `${text.slice(0, currentCursorPos)}‸${text.slice(currentCursorPos)}`;
       const [prettyText, newCursorPos] = makePretty(makeCompact(textWithCursor));
       setManualTypeInput(prettyText);

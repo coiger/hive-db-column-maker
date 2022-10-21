@@ -29,10 +29,9 @@ const isCorrectParenthesis = (type: string) => {
       if (alreadyAllClosed) return false;
       openParen[openParen.length] = c;
     } else if (c === '>' || c === ')') {
-      const top = openParen[openParen.length - 1];
+      const top = openParen.pop();
       if (top === '<' && c === ')') return false;
       if (top === '(' && c === '>') return false;
-      openParen.pop();
       if (openParen.length === 0) alreadyAllClosed = true;
     }
   }

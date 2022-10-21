@@ -102,6 +102,84 @@ function DBColumnInsert({ onInsert }: PropTypes) {
     }
   };
 
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let { value } = e.target;
+    if (value.includes('‸')) {
+      notification.warning({
+        message: 'Hive Column 입력 경고',
+        description: `CARET(‸) 문자는 사용이 제한되어 있습니다.`,
+        placement: 'bottomRight',
+      });
+      return;
+    }
+    if (/[,|:|(|)|<|>|\s]/.test(value)) {
+      notification.error({
+        message: 'Hive Column 입력 오류',
+        description: `공백 및 타입 구분 문자(쉼표[,], 콜론[:], 괄호[(), <>])는 사용할 수 없습니다.`,
+        placement: 'bottomRight',
+      });
+      return;
+    }
+    if (/^`.*`$/.test(value)) {
+      notification.info({
+        message: 'Hive Column 이름 백틱 규칙',
+        description: `컬럼 이름에 백틱은 자동으로 둘러집니다.`,
+        placement: 'bottomRight',
+      });
+      value = value.slice(1, -1);
+    }
+    setName(value);
+    setIsDupName(false);
+  };
+
+  const handleManualTypeChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    if (e.target.value.includes('‸')) {
+      notification.warning({
+        message: 'Hive Column 입력 경고',
+        description: `CARET(‸) 문자는 사용이 제한되어 있습니다.`,
+        placement: 'bottomRight',
+      });
+      return;
+    }
+
+    const text = e.target.value;
+    const isValid = isValidHiveType(text);
+    setIsValidType(isValid);
+
+    if (isValid) {
+      const compactText = makeCompact(text);
+      if (text.match(/`/g)?.length !== compactText.match(/`/g)?.length) {
+        notification.info({
+          message: 'Hive Column 이름 백틱 규칙',
+          description: `컬럼 이름에 백틱은 자동으로 둘러집니다.`,
+          placement: 'bottomRight',
+        });
+      } else if (
+        // no backtick is removed, and
+        isValidHiveType(manualTypeInput) && // if previous input was valid, and
+        compactText === makeCompact(manualTypeInput) // if compact version of current input is same as compact previous input
+      ) {
+        setManualTypeInput(text);
+        return;
+      }
+
+      const currentCursorPos = e.target.selectionStart;
+      const textWithCursor = `${text.slice(0, currentCursorPos)}‸${text.slice(currentCursorPos)}`;
+      const [prettyText, newCursorPos] = makePretty(makeCompact(textWithCursor));
+      setManualTypeInput(prettyText);
+      setType(compactText);
+      if (newCursorPos) {
+        setTimeout(() => {
+          e.target.selectionStart = newCursorPos;
+          e.target.selectionEnd = newCursorPos;
+        }, 0);
+      }
+    } else {
+      setManualTypeInput(text);
+      setType('');
+    }
+  };
+
   return (
     <Card>
       <Form>
@@ -118,35 +196,7 @@ function DBColumnInsert({ onInsert }: PropTypes) {
             value={name}
             status={isEmptyName || isDupName ? 'error' : ''}
             placeholder={isEmptyName ? '필수 입력입니다' : ''}
-            onChange={e => {
-              let { value } = e.target;
-              if (value.includes('‸')) {
-                notification.warning({
-                  message: 'Hive Column 입력 경고',
-                  description: `CARET(‸) 문자는 사용이 제한되어 있습니다.`,
-                  placement: 'bottomRight',
-                });
-                return;
-              }
-              if (/[,|:|(|)|<|>|\s]/.test(value)) {
-                notification.error({
-                  message: 'Hive Column 입력 오류',
-                  description: `공백 및 타입 구분 문자(쉼표[,], 콜론[:], 괄호[(), <>])는 사용할 수 없습니다.`,
-                  placement: 'bottomRight',
-                });
-                return;
-              }
-              if (/^`.*`$/.test(value)) {
-                notification.info({
-                  message: 'Hive Column 이름 백틱 규칙',
-                  description: `컬럼 이름에 백틱은 자동으로 둘러집니다.`,
-                  placement: 'bottomRight',
-                });
-                value = value.slice(1, -1);
-              }
-              setName(value);
-              setIsDupName(false);
-            }}
+            onChange={handleNameChange}
             onPressEnter={handleSubmit}
           />
           {showNameHint && (
@@ -204,53 +254,7 @@ function DBColumnInsert({ onInsert }: PropTypes) {
               autoFocus
               status={(!submitWasTried && manualTypeInput === '') || isValidType ? undefined : 'error'}
               value={manualTypeInput}
-              onChange={e => {
-                if (e.target.value.includes('‸')) {
-                  notification.warning({
-                    message: 'Hive Column 입력 경고',
-                    description: `CARET(‸) 문자는 사용이 제한되어 있습니다.`,
-                    placement: 'bottomRight',
-                  });
-                  return;
-                }
-
-                const text = e.target.value;
-                const isValid = isValidHiveType(text);
-                setIsValidType(isValid);
-
-                if (isValid) {
-                  const compactText = makeCompact(text);
-                  if (text.match(/`/g)?.length !== compactText.match(/`/g)?.length) {
-                    notification.info({
-                      message: 'Hive Column 이름 백틱 규칙',
-                      description: `컬럼 이름에 백틱은 자동으로 둘러집니다.`,
-                      placement: 'bottomRight',
-                    });
-                  } else if (
-                    // no backtick is removed, and
-                    isValidHiveType(manualTypeInput) && // if previous input was valid, and
-                    compactText === makeCompact(manualTypeInput) // if compact version of current input is same as compact previous input
-                  ) {
-                    setManualTypeInput(text);
-                    return;
-                  }
-
-                  const currentCursorPos = e.target.selectionStart;
-                  const textWithCursor = `${text.slice(0, currentCursorPos)}‸${text.slice(currentCursorPos)}`;
-                  const [prettyText, newCursorPos] = makePretty(makeCompact(textWithCursor));
-                  setManualTypeInput(prettyText);
-                  setType(compactText);
-                  if (newCursorPos) {
-                    setTimeout(() => {
-                      e.target.selectionStart = newCursorPos;
-                      e.target.selectionEnd = newCursorPos;
-                    }, 0);
-                  }
-                } else {
-                  setManualTypeInput(text);
-                  setType('');
-                }
-              }}
+              onChange={handleManualTypeChange}
               onPressEnter={e => {
                 if (e.ctrlKey) {
                   handleSubmit();

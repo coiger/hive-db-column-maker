@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/hive-db-column-maker/static/css/main.70f756cb.css",
-    "main.js": "/hive-db-column-maker/static/js/main.d0923e70.js",
+    "main.js": "/hive-db-column-maker/static/js/main.fdf2ca1e.js",
     "static/js/787.00426c33.chunk.js": "/hive-db-column-maker/static/js/787.00426c33.chunk.js",
     "index.html": "/hive-db-column-maker/index.html",
     "main.70f756cb.css.map": "/hive-db-column-maker/static/css/main.70f756cb.css.map",
-    "main.d0923e70.js.map": "/hive-db-column-maker/static/js/main.d0923e70.js.map",
+    "main.fdf2ca1e.js.map": "/hive-db-column-maker/static/js/main.fdf2ca1e.js.map",
     "787.00426c33.chunk.js.map": "/hive-db-column-maker/static/js/787.00426c33.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.70f756cb.css",
-    "static/js/main.d0923e70.js"
+    "static/js/main.fdf2ca1e.js"
   ]
 }

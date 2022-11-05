@@ -1,12 +1,12 @@
 # Hive Database Column Maker
-Hive 규칙에 따른 database column 이름/타입 검증 및 포맷팅 에디터
+Hive 규칙에 따른 database column 이름/타입 검증 및 포맷팅 에디터  
+- **DEMO**: https://coiger.github.io/hive-db-column-maker/
 
 ## 이름 규칙
 - [기본 규칙](https://cwiki.apache.org/confluence/display/hive/languagemanual+ddl#LanguageManualDDL-RulesforColumnNames:~:text=result%20in%20error.-,Alter,-Column)에 기반
 - STRUCT 타입 내 컬럼 이름에도 동일한 규칙 적용
 
 ### Implemented Rule
-- 대소문자 비구문(case-insensitive)
 - 중복되는 이름 비허용
 - 공백 및 타입 구분 문자를 제외한 모든 유니코드 문자 허용
     - 타입 구분 문자 = 쉼표(,)와 콜론(:), 그리고 괄호('<', '>', '(', ')')
@@ -50,6 +50,21 @@ Hive 규칙에 따른 database column 이름/타입 검증 및 포맷팅 에디�
 - 직접 입력을 선택하여 입력하는 경우 [타입 규칙](#%ED%83%80%EC%9E%85-%EA%B7%9C%EC%B9%99)에 맞게 검증
 - 타입 규칙을 지킨 입력의 경우 보기 좋은 형식으로 포맷팅
 - 타입 규칙을 어긴 입력의 경우 입력창 테두리가 붉어짐
+
+## 포맷팅 규칙
+### 괄호
+- 여는 괄호를 입력한 경우, 괄호 이후가 입력의 끝이나 공백, 또는 닫는 괄호라면, 닫는 괄호를 자동으로 붙여줍니다.
+- 다음 문자가 닫는 괄호인데 닫는 괄호를 입력한 경우 커서만 다음으로 옮겨줍니다.
+
+### 개행
+- 둥근 괄호 '('와 ')' 사이에 있는 문자는 개행 없이 쭉 입력합니다.
+- 꺾인 괄호 '<'와 '>' 사이에 있는 문자는 길지 않으면 개행 없이 쭉 입력하며, 길 경우 개행됩니다.
+    - 개행될 때 인덴트가 한 수준 깊어집니다.
+    - '>'를 빠져 나오면 인덴트가 한 수준 감소합니다.
+
+### 띄어쓰기
+- ',' 뒤에는 한 칸 띄어씁니다.
+- ':' 뒤에는 한 칸 띄어씁니다.
 
 ## 개발 스택 (only front-end)
 - This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

@@ -64,11 +64,12 @@ function DBColumnInsert({ onInsert }: PropTypes) {
       return;
     }
 
-    if (!onInsert(`\`${name.replace(/`/g, '``')}\``, backtickedType(type))) {
+    const backtickedName = `\`${name.replace(/`/g, '``')}\``;
+    if (!onInsert(backtickedName, backtickedType(type))) {
       setIsDupName(true);
       notification.error({
         message: 'Hive Column 입력 오류',
-        description: `\`${name}\`은(는) 이미 존재하는 이름입니다.`,
+        description: `${backtickedName}은(는) 이미 존재하는 이름입니다.`,
         placement: 'bottomRight',
       });
       return;

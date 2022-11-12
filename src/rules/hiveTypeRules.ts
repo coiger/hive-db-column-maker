@@ -19,7 +19,7 @@ export const primitiveTypes = [
   'BINARY',
 ];
 
-const isCorrectParenthesis = (type: string) => {
+export const isCorrectParenthesis = (type: string) => {
   const openParen = [];
   let alreadyAllClosed = false;
 
@@ -43,13 +43,13 @@ const isCorrectParenthesis = (type: string) => {
  * @param text 문자열 내에 '<'가 존재하고, 마지막 문자가 '>'인 문자열
  * @returns '<'와 '>' 내의 문자열을 반환
  */
-const getNested = (text: string) => text.slice(text.indexOf('<') + 1, -1);
+export const getNested = (text: string) => text.slice(text.indexOf('<') + 1, -1);
 
 /**
  * separator로 문자열을 토큰화합니다.
  * @description 괄호 안의 separator는 무시합니다.
  */
-const tokenize = (types: string, separator: string) => {
+export const tokenize = (types: string, separator: string) => {
   const ret: string[] = [];
   let isInParenthesis = 0;
   types.split(separator).forEach(type => {
@@ -72,7 +72,7 @@ const tokenize = (types: string, separator: string) => {
  * @param colName 양끝 공백이 없는 문자열
  * @returns 올바른 형식의 컬럼 이름인지 여부
  */
-const isValidColName = (colName: string): boolean => {
+export const isValidColName = (colName: string): boolean => {
   if (colName === '' || colName === '``') return false;
 
   if (/[,|:|(|)|<|>|\s|‸]/.test(colName)) return false;
@@ -93,7 +93,7 @@ const isValidColName = (colName: string): boolean => {
  * 타입이 Hive 형식에 맞는지 확인합니다.
  * @description 이 함수는 isCorrectParenthesis()가 true임을 가정합니다.
  */
-const checkValidDataType = (rawType: string): boolean => {
+export const checkValidDataType = (rawType: string): boolean => {
   const checkValidPrimitiveType = (type: string) =>
     primitiveTypes.includes(type.toUpperCase()) ||
     /^CHAR\s*\(\s*\d+\s*\)$/is.test(type) ||

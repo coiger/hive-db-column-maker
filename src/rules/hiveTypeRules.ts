@@ -176,7 +176,7 @@ export const makeCompact = (text: string) => {
 
     if (/^‸?S‸?T‸?R‸?U‸?C‸?T‸?<.*>$/i.test(noSpaceText)) {
       const nameTypePairs = tokenize(getNested(noSpaceText), ',').map(pair => tokenize(pair, ':').map(s => s.trim()));
-      return `${noSpaceText.split('<', 1)[0]}<${nameTypePairs
+      return `${noSpaceText.split('<', 1)[0].toUpperCase()}<${nameTypePairs
         .map(([colName, dataType]) => {
           let unBacktickedColName: string = colName;
           if (/^`.*`‸?$/.test(colName)) {

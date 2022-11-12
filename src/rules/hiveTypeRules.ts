@@ -66,6 +66,30 @@ const tokenize = (types: string, separator: string) => {
 };
 
 /**
+ * 컬럼 이름이 올바른 형식인지를 확인합니다.
+ * - 공백, 캐럿 문자(‸) 및 타입 구분 문자(쉼표[,], 콜론[:], 괄호[(), <>])가 없어야 합니다.
+ * - 백틱(`)으로 둘러싸인 문자열인 경우, 연속된 백틱의 개수가 홀수개여선 안됩니다.
+ * @param colName 양끝 공백이 없는 문자열
+ * @returns 올바른 형식의 컬럼 이름인지 여부
+ */
+const isValidColName = (colName: string): boolean => {
+  if (colName === '' || colName === '``') return false;
+
+  if (/[,|:|(|)|<|>|\s|‸]/.test(colName)) return false;
+
+  if (
+    /^`.+`$/.test(colName) &&
+    colName
+      .slice(1, -1)
+      .match(/`+/g)
+      ?.some(s => s.length % 2)
+  )
+    return false;
+
+  return true;
+};
+
+/**
  * 타입이 Hive 형식에 맞는지 확인합니다.
  * @description 이 함수는 isCorrectParenthesis()가 true임을 가정합니다.
  */
@@ -100,6 +124,7 @@ const checkValidDataType = (rawType: string): boolean => {
 
   /**
    * STRUCT < col_name : data_type, ... > 형식이 맞는지 확인합니다.
+   * col_name은 공백 및 타입 구분 문자(쉼표[,], 콜론[:], 괄호[(), <>])가 없어야 합니다.
    */
   const checkValidStructType = (type: string) => {
     if (!/^STRUCT\s*<.*>$/is.test(type)) return false;
@@ -109,12 +134,12 @@ const checkValidDataType = (rawType: string): boolean => {
     const nameTypePairs = tokenize(nestedStr, ',').map(pair => tokenize(pair, ':').map(s => s.trim()));
     return (
       nameTypePairs.every(pair => pair.length === 2) &&
-      nameTypePairs.every(([colName, dataType]) => !/\s+/s.test(colName) && checkValidDataType(dataType))
+      nameTypePairs.every(([colName, dataType]) => isValidColName(colName) && checkValidDataType(dataType))
     );
   };
 
   /**
-   * ARRAY < data_type > 형식에 맞는지 확인
+   * ARRAY < data_type > 형식에 맞는지 확인합니다.
    */
   const checkValidUnionType = (type: string) => {
     if (!/^UNIONTYPE\s*<.*>$/is.test(type)) return false;

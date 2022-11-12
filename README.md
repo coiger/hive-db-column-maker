@@ -1,6 +1,6 @@
 # Hive Database Column Maker
 Hive 규칙에 따른 database column 이름/타입 검증 및 포맷팅 에디터  
-[![Coverage Status](https://coveralls.io/repos/github/coiger/hive-db-column-maker/badge.svg?branch=main)](https://coveralls.io/github/coiger/hive-db-column-maker?branch=main)
+[![Coverage Status](https://coveralls.io/repos/github/coiger/hive-db-column-maker/badge.svg)](https://coveralls.io/github/coiger/hive-db-column-maker?branch=main)
 - **DEMO**: https://coiger.github.io/hive-db-column-maker/
 
 ## 이름 규칙

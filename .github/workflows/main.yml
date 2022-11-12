@@ -20,6 +20,9 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
+          repo-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          GITHUB_TOKEN: ${{ github.token }}
 
       - run: npm ci
       - run: npm run lint

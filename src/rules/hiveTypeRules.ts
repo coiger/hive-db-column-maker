@@ -179,10 +179,11 @@ export const makeCompact = (text: string) => {
       const nameTypePairs = tokenize(getNested(noSpaceText), ',').map(pair => tokenize(pair, ':').map(s => s.trim()));
       return `${noSpaceText.split('<', 1)[0]}<${nameTypePairs
         .map(([colName, dataType]) => {
-          let unBacktickedColName = colName;
+          let unBacktickedColName: string = colName;
           if (/^`.*`‸?$/.test(colName)) {
             if (colName.at(-1) === '‸') unBacktickedColName = `${colName.slice(1, -2)}‸`;
             else unBacktickedColName = colName.slice(1, -1);
+            unBacktickedColName = unBacktickedColName.replaceAll('``', '`');
           }
           return `${unBacktickedColName}:${helpMakeCompact(dataType)}`;
         })

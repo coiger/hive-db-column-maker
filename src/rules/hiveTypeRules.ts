@@ -124,7 +124,6 @@ const checkValidDataType = (rawType: string): boolean => {
 
   /**
    * STRUCT < col_name : data_type, ... > 형식이 맞는지 확인합니다.
-   * col_name은 공백 및 타입 구분 문자(쉼표[,], 콜론[:], 괄호[(), <>])가 없어야 합니다.
    */
   const checkValidStructType = (type: string) => {
     if (!/^STRUCT\s*<.*>$/is.test(type)) return false;
@@ -165,7 +164,7 @@ export const isValidHiveType = (type: string) => isCorrectParenthesis(type) && c
 
 /**
  * 공백을 제거하고, STRUCT 타입의 컬럼 이름을 제외한 문자의 대문자화를 수행합니다.
- * STRUCT 타입의 컬럼 이름에 백틱이 둘러져 있는 경우, 백틱을 제거해줍니다.
+ * STRUCT 타입의 컬럼 이름에 백틱이 둘러져 있는 경우, 백틱을 제거하고 내부 더블-백틱을 단일 백틱으로 변환합니다.
  * @description checkValidDataType() 함수의 반환값이 true인 텍스트를 입력으로 가정합니다.
  */
 export const makeCompact = (text: string) => {
@@ -190,6 +189,7 @@ export const makeCompact = (text: string) => {
         .join(',')}>`;
     }
 
+    // complex types
     if (noSpaceText.includes('<'))
       return `${noSpaceText.split('<', 1)[0].toUpperCase()}<${helpMakeCompact(getNested(noSpaceText))}>`;
 

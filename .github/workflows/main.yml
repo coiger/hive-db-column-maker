@@ -20,6 +20,9 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
+          repository: ${{ github.repository }}
+          repo-token: ${{ github.token }}
+          GITHUB_TOKEN: ${{ github.token }}
 
       - run: npm install
       - run: make test-coverage
